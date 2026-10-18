@@ -33,6 +33,10 @@ export default defineConfig({
     env: {
       ADMIN_PASSWORD: "e2e-only-password-never-use-this-in-production",
       BLOB_READ_WRITE_TOKEN: "e2e-only-not-a-real-blob-token",
+      SESSION_SECRET: "e2e-only-session-secret-never-use-in-production",
+      GITHUB_CLIENT_ID: "e2e-only-client-id",
+      GITHUB_CLIENT_SECRET: "e2e-only-client-secret",
+      APP_ORIGIN: baseURL,
     },
     reuseExistingServer: !process.env.CI && !process.env.E2E_PORT,
     timeout: 120000,

@@ -26,6 +26,7 @@ test("administrator can register, reload and delete domains in the browser", asy
     await route.fulfill({ json: settings });
   });
   await page.goto("/");
+  await page.getByRole("button", { name: "運営者用", exact: true }).click();
   const setup = page.getByRole("region", { name: "許可ドメインの管理" });
   await setup
     .getByLabel("管理者パスワード", { exact: true })
@@ -46,11 +47,13 @@ test("administrator can register, reload and delete domains in the browser", asy
     .check();
   await setup.getByRole("button", { name: "追加して保存" }).click();
   await expect(setup.getByText("owned.example", { exact: true })).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
     path: `docs/screenshots/admin-settings-${testInfo.project.name}.png`,
     fullPage: true,
   });
   await page.reload();
+  await page.getByRole("button", { name: "運営者用", exact: true }).click();
   await expect(setup.getByText("owned.example", { exact: true })).toBeVisible();
   await page.getByLabel("診断対象のURL", { exact: true }).fill("https://owned.example/");
   await page
@@ -92,9 +95,9 @@ test("administrator can register, reload and delete domains in the browser", asy
   expect((await (await page.request.get("/api/admin/session")).json()).authenticated).toBe(false);
   for (const width of [320, 768]) {
     await page.setViewportSize({ width, height: 900 });
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
-      width,
-    );
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
+      .toBeLessThanOrEqual(width);
   }
 });
 
@@ -107,6 +110,7 @@ test("first-time Vercel setup has browser instructions without local commands", 
     }),
   );
   await page.goto("/");
+  await page.getByRole("button", { name: "運営者用", exact: true }).click();
   const setup = page.getByRole("region", { name: "許可ドメインの管理" });
   await expect(setup.getByText("初回だけ：Vercelダッシュボードで準備する")).toBeVisible();
   await expect(setup.getByText("Private Blobを接続", { exact: true })).toBeVisible();

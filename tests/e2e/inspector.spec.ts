@@ -8,18 +8,20 @@ test("demo, details, filters and JSON export work without an inspection request"
   const requests: string[] = [];
   const errors: string[] = [];
   page.on("request", (request) => {
-    if (request.url().includes("/api/inspect") || !request.url().startsWith(baseURL!))
+    if (request.url().includes("/inspect") || !request.url().startsWith(baseURL!))
       requests.push(request.url());
   });
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Webサイトの安全を");
   await expect(page.getByRole("button", { name: "診断を開始" })).toBeDisabled();
-  const setup = page.getByRole("region", { name: "許可ドメインの管理" });
+  const setup = page.getByRole("region", { name: "自社ドメインの確認" });
   await expect(setup).toBeVisible();
-  await expect(setup.getByRole("heading", { name: "ブラウザで許可ドメインを管理" })).toBeVisible();
-  await expect(setup.getByLabel("管理者パスワード", { exact: true })).toBeVisible();
-  await expect(page.getByRole("status")).toContainText("ログインと許可ドメインの登録が必要");
+  await expect(
+    setup.getByRole("heading", { name: "自社ドメインを確認して診断する" }),
+  ).toBeVisible();
+  await expect(setup.getByRole("button", { name: "GitHubでログイン", exact: true })).toBeVisible();
+  await expect(page.getByRole("status")).toContainText("GitHubログインと、自社ドメインのDNS確認");
   await page.screenshot({
     path: `docs/screenshots/dashboard-${testInfo.project.name}.png`,
     fullPage: true,
@@ -59,9 +61,9 @@ test("demo, details, filters and JSON export work without an inspection request"
   expect(width.document).toBeLessThanOrEqual(width.window);
   for (const viewportWidth of [320, 768, 1024]) {
     await page.setViewportSize({ width: viewportWidth, height: 900 });
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
-      viewportWidth,
-    );
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
+      .toBeLessThanOrEqual(viewportWidth);
   }
 });
 

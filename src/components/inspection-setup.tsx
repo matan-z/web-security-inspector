@@ -176,7 +176,7 @@ export function InspectionSetup({
               <strong>Private Blobを接続</strong>
               <p>
                 Vercelのプロジェクト →
-                StorageでBlobストアを作成し、アクセスをPrivateにしてプロジェクトに接続します。保存用トークンが自動設定されます。
+                StorageでBlobストアを作成し、アクセスをPrivateにしてプロジェクトに接続します。OIDC接続情報、または読み書きトークンを利用します。
               </p>
             </li>
             <li>
@@ -235,7 +235,7 @@ export function InspectionSetup({
             </Button>
           </div>
           <p className="admin-helper">
-            実サイト診断と設定変更は管理者のみ利用できます。デモはログイン不要です。
+            この運営者用の設定変更には管理者パスワードが必要です。訪問者は「自分のドメインを診断」からGitHubでログインしてください。
           </p>
         </form>
       )}

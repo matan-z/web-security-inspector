@@ -3,5 +3,10 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "installCommand": "npm ci",
-  "functions": { "src/app/api/inspect/route.ts": { "maxDuration": 15 } }
+  "functions": {
+    "src/app/api/inspect/route.ts": { "maxDuration": 15 },
+    "src/app/api/visitor/inspect/route.ts": { "maxDuration": 30 },
+    "src/app/api/account/domains/route.ts": { "maxDuration": 30 },
+    "src/app/api/auth/github/callback/route.ts": { "maxDuration": 15 }
+  }
 }

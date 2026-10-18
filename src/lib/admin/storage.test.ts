@@ -16,6 +16,13 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe("private domain configuration", () => {
+  it("supports the SDK's Vercel OIDC store connection as well as read-write tokens", async () => {
+    vi.stubEnv("BLOB_READ_WRITE_TOKEN", "");
+    vi.stubEnv("BLOB_STORE_ID", "store_test_id");
+    vi.stubEnv("VERCEL_OIDC_TOKEN", "test-only-oidc-token");
+    vi.mocked(get).mockResolvedValue(null);
+    expect(await readHostSettings()).toEqual({ hosts: [], revision: null, updatedAt: null });
+  });
   it("fails closed with no storage configuration and never returns environment hosts", async () => {
     vi.stubEnv("BLOB_READ_WRITE_TOKEN", "");
     vi.stubEnv("ALLOWED_HOSTS", "example.com");

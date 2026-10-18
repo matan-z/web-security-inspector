@@ -27,12 +27,14 @@ import { Badge } from "./ui/badge";
 import { InspectionReport, type Filter } from "./inspection-report";
 import { Guide, About } from "./info-pages";
 import { InspectionSetup } from "./inspection-setup";
+import { VisitorSetup } from "./visitor-setup";
 import { createDemoResult } from "@/lib/inspection/demo";
 import { type Category, type InspectionResult } from "@/lib/inspection/types";
 
 type View = "dashboard" | "guide" | "about";
 
 export function Inspector() {
+  const [scanMode, setScanMode] = useState<"visitor" | "admin">("visitor");
   const [liveEnabled, setLiveEnabled] = useState(false);
   const [settingsVersion, setSettingsVersion] = useState(0);
   const [view, setView] = useState<View>("dashboard");
@@ -86,18 +88,25 @@ export function Inspector() {
     setResult(null);
     const controller = new AbortController();
     controllerRef.current = controller;
-    const timer = setTimeout(() => controller.abort(), 15000);
+    const timer = setTimeout(() => controller.abort(), 35000);
     try {
-      const response = await fetch("/api/inspect", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url.trim(), authorized }),
-        signal: controller.signal,
-      });
+      const response = await fetch(
+        scanMode === "visitor" ? "/api/visitor/inspect" : "/api/inspect",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: url.trim(), authorized }),
+          signal: controller.signal,
+        },
+      );
       const data = await response.json();
-      if (response.status === 401) {
+      if (scanMode === "visitor") {
         setLiveEnabled(false);
         setSettingsVersion((value) => value + 1);
+      }
+      if (response.status === 401 || (scanMode === "visitor" && response.status === 403)) {
+        setLiveEnabled(false);
+        if (scanMode === "admin") setSettingsVersion((value) => value + 1);
       }
       if (!response.ok) throw new Error(data.error?.message ?? "診断を完了できませんでした。");
       if (controllerRef.current !== controller) return;
@@ -305,11 +314,43 @@ export function Inspector() {
                     {liveEnabled ? "許可ドメインのみ" : "デモを利用できます"}
                   </Badge>
                 </div>
-                <InspectionSetup
-                  key={settingsVersion}
-                  onAvailabilityChange={setLiveEnabled}
-                  onLogout={clearPrivateData}
-                />
+                <div className="access-mode" role="group" aria-label="診断の利用方法">
+                  {(
+                    [
+                      ["visitor", "自分のドメインを診断"],
+                      ["admin", "運営者用"],
+                    ] as const
+                  ).map(([mode, label]) => (
+                    <button
+                      type="button"
+                      key={mode}
+                      aria-pressed={scanMode === mode}
+                      className={scanMode === mode ? "selected" : ""}
+                      onClick={() => {
+                        if (mode !== scanMode) {
+                          clearPrivateData();
+                          setLiveEnabled(false);
+                          setScanMode(mode);
+                        }
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                {scanMode === "visitor" ? (
+                  <VisitorSetup
+                    key={`visitor-${settingsVersion}`}
+                    onAvailabilityChange={setLiveEnabled}
+                    onLogout={clearPrivateData}
+                  />
+                ) : (
+                  <InspectionSetup
+                    key={`admin-${settingsVersion}`}
+                    onAvailabilityChange={setLiveEnabled}
+                    onLogout={clearPrivateData}
+                  />
+                )}
                 <form onSubmit={inspect}>
                   <label htmlFor="target-url" className="input-label">
                     診断対象のURL
@@ -362,7 +403,9 @@ export function Inspector() {
                   {!loading && (
                     <p className="start-requirement" role="status">
                       {!liveEnabled
-                        ? "実サイト診断には、上の管理画面でのログインと許可ドメインの登録が必要です。"
+                        ? scanMode === "visitor"
+                          ? "GitHubログインと、自社ドメインのDNS確認を先に完了してください。"
+                          : "実サイト診断には、上の管理画面でのログインと許可ドメインの登録が必要です。"
                         : !authorized
                           ? "開始するには、所有権・診断許可の確認にチェックを入れてください。"
                           : "許可ドメインのURLを入力して診断を開始できます。"}

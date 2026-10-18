@@ -7,7 +7,10 @@ import type { HostSettings } from "./types";
 
 const PATH = "web-security-inspector/allowed-hosts-v1.json";
 export function storageConfigured() {
-  return !!process.env.BLOB_READ_WRITE_TOKEN?.trim();
+  return (
+    !!process.env.BLOB_READ_WRITE_TOKEN?.trim() ||
+    !!(process.env.BLOB_STORE_ID?.trim() && process.env.VERCEL_OIDC_TOKEN?.trim())
+  );
 }
 function requireStorage() {
   if (!storageConfigured())
