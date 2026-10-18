@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.agents
+.aws
+.codex
+.vercel
+package-lock.json
+next-env.d.ts
+test-results
+playwright-report
+docs/screenshots
+AGENTS.md
