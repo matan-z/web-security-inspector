@@ -107,6 +107,9 @@ export function About() {
           GitHubの利用者IDをハッシュ化した識別子と、自分のドメイン・DNS確認コード・利用回数をPrivate
           Blobに保存します。メールアドレス、GitHubのアクセストークン、診断結果は保存しません。Cookieの値や応答本文は結果に含めません。ログアウトすると画面上の入力URLと診断結果を消去します。診断対象のサーバーには接続元IPとリクエストが伝わり、ホスティング基盤がアクセス記録を扱う場合があります。秘密情報をURLやパスに含めないでください。
         </p>
+        <p>
+          PDFは表示中の診断結果からブラウザ内で作成します。PDF・JSONをダウンロードしたファイルは、お使いの端末に残り、ログアウトしても消去されません。
+        </p>
         <div className="stack-tags">
           <Badge>Next.js</Badge>
           <Badge>TypeScript</Badge>

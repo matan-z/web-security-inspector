@@ -3,6 +3,13 @@ import { Check, CircleAlert, Download, Globe2, Info, Shield } from "lucide-react
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { CheckList } from "./check-list";
+import { PdfDownloadButton } from "./pdf-download-button";
+import {
+  REDIRECT_NOTICE,
+  httpStatusNotice,
+  REPORT_SCOPE_NOTE,
+  SCORE_DISCLAIMER,
+} from "@/lib/inspection/report-notes";
 import {
   CATEGORY_LABELS,
   summarize,
@@ -49,10 +56,13 @@ export function InspectionReport({
             </Badge>
           </h2>
         </div>
-        <Button variant="outline" size="sm" onClick={download}>
-          <Download size={14} />
-          JSONをダウンロード
-        </Button>
+        <div className="report-actions">
+          <PdfDownloadButton result={result} />
+          <Button variant="outline" size="sm" onClick={download}>
+            <Download size={14} />
+            JSONをダウンロード
+          </Button>
+        </div>
       </div>
       {result.mode === "demo" && (
         <div className="demo-notice">
@@ -81,7 +91,7 @@ export function InspectionReport({
                   : "基本設定は良好です"}
             </h3>
             <p>判定できた{evaluated}項目の参考スコア</p>
-            <span className="score-disclaimer">サイト全体の安全性を保証するものではありません</span>
+            <span className="score-disclaimer">{SCORE_DISCLAIMER}</span>
           </div>
         </article>
         <div className="status-cards">
@@ -137,18 +147,13 @@ export function InspectionReport({
       {result.redirected && (
         <div className="demo-notice">
           <Info size={16} />
-          <p>
-            リダイレクト応答のみを評価しました。転送先には接続していません。転送先ページの設定は判定できません。
-          </p>
+          <p>{REDIRECT_NOTICE}</p>
         </div>
       )}
       {(result.httpStatus < 200 || result.httpStatus >= 400) && (
         <div className="demo-notice">
           <Info size={16} />
-          <p>
-            HTTP {result.httpStatus}{" "}
-            の応答に含まれる設定を評価しています。通常ページやログイン後の設定とは異なる場合があります。
-          </p>
+          <p>{httpStatusNotice(result.httpStatus)}</p>
         </div>
       )}
       <div className="panel findings-panel">
@@ -195,9 +200,7 @@ export function InspectionReport({
       </div>
       <div className="report-note">
         <Info size={15} />
-        <p>
-          このURLの単一レスポンスのみを評価します。認証後のページ、HTML内のmeta設定、JavaScriptで発行されたCookieは対象外です。参考スコアは重要度で加重し、良好100%・要確認50%・問題あり0%で計算します。該当なし・判定不可は除外します。
-        </p>
+        <p>{REPORT_SCOPE_NOTE}</p>
       </div>
     </section>
   );

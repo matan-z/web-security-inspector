@@ -1006,6 +1006,19 @@ h1 span {
   margin-top: 4px;
   font-weight: 500;
 }
+.report-actions {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pdf-download-error {
+  max-width: 260px;
+  margin-top: 8px;
+  color: var(--fail);
+  font-size: 12px;
+  line-height: 1.7;
+}
 .demo-notice {
   display: flex;
   align-items: flex-start;
@@ -1941,8 +1954,12 @@ pre {
     font-size: 14px;
   }
   .results-title {
-    align-items: flex-end;
+    align-items: flex-start;
+    flex-wrap: wrap;
     gap: 8px;
+  }
+  .report-actions {
+    width: 100%;
   }
   .results-title .button {
     padding: 7px 9px;
