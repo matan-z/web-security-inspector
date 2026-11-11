@@ -36,7 +36,7 @@ GitHubのリポジトリ設定と、Vercelのプロジェクト設定は別の�
 プロジェクトのターミナルで、次のフォルダへ移動します。
 
 ```sh
-cd "/home/lala/Dropbox/0000_Portfolio/0004_Web Security Inspector"
+cd path/to/web-security-inspector  # クローンしたフォルダ
 ```
 
 現在のブランチと変更内容を確認します。

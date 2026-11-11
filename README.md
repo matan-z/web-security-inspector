@@ -4,6 +4,10 @@
 
 自社WebサイトのHTTPS、TLS証明書、セキュリティヘッダー、Cookieの公開設定を確認し、リスクと改善方法を日本語で表示するWebアプリです。登録不要のデモを用意しているため、環境変数を設定しなくても機能を体験できます。
 
+- **公開URL**：https://web-security-inspector-sepia.vercel.app （「デモを試す」はログイン不要）
+- **技術**：Next.js 16 / React 19 / TypeScript / Tailwind CSS 4 / Vitest / Playwright / Vercel
+- **重視したこと**：診断ツール自体が攻撃の踏み台にならない設計（SSRF対策、DNS TXTによるドメインの管理権限確認、利用回数の制限、OAuthのstate・PKCE）と、それを確かめる単体テスト143件・E2Eテスト
+
 > 静的な公開設定を確認するツールであり、包括的な侵入テストではありません。参考スコアや「良好」の結果は、サイト全体の安全性を保証しません。
 
 > **訪問者も自社サイトを診断できます。** GitHubログイン → 自社ドメインを登録 → DNSのTXTレコードで管理権限を確認 → URLを診断。各ユーザーは自分の確認済みドメインだけを利用できます。デモは引き続きログイン不要です。運営者による初回のOAuth・Private Blob設定は[Vercelの初期設定](#vercelへのデプロイと初期設定)をご覧ください。
@@ -45,7 +49,7 @@
 - Vitest / Playwright
 - pdf-lib / @pdf-lib/fontkit / M PLUS 1p（日本語PDF出力・SIL Open Font License 1.1）
 
-依存関係の正確なバージョンは`package-lock.json`に固定しています。Node.js 22で動作確認しました。開発・本番ともNext.js公式のWebpack方式を使用し、この実行環境で発生したTurbopackの内部ポート制約を回避しています。データベースやPythonは使いません。
+依存関係の正確なバージョンは`package-lock.json`に固定しています。Node.js 22で動作確認しました。開発・本番ともWebpackでビルドします（`next dev --webpack` / `next build --webpack`）。データベースは使いません。
 
 ## PDFで診断結果を保存
 
@@ -55,9 +59,9 @@
 
 PDF用ライブラリと同梱の日本語フォントは保存時に読み込みます。生成はブラウザ内で行い、再診断・利用回数の消費・診断結果のサーバー保存は行いません。フォントの配布元・ライセンスは[public/fonts/README.md](public/fonts/README.md)を参照してください。デモを保存した場合、日時は架空のサンプル日時です。
 
-## Ubuntuでのローカル起動
+## ローカルでの起動
 
-Node.js 22.xとnpmを用意してください。nvmを使う場合は`.nvmrc`を利用できます。
+Node.js 22.xとnpmを用意してください（Ubuntuで動作確認）。nvmを使う場合は`.nvmrc`を利用できます。
 
 ```bash
 # このREADMEのあるディレクトリで実行
@@ -210,7 +214,7 @@ E2Eサーバーのパスワード・SESSION_SECRET・GitHubクライアント情
 
 ## Vercelへのデプロイと初期設定
 
-**この初期設定はすべてブラウザで行えます。ローカルの.env.local編集やCLIは不要です。GitHub push・外部公開はユーザーの確認後に行ってください。**
+**この初期設定はすべてブラウザで行えます。ローカルの.env.local編集やCLIは不要です。**
 
 1. GitHubリポジトリをVercelの「Add New → Project」からImportします。Root DirectoryはこのREADMEのあるディレクトリ、Node.jsは22.x、Install Commandはnpm ci、Build Commandはnpm run buildです。
 2. VercelのStorageで専用のBlobストアを作成し、アクセスを**Private**にしてProductionへ接続します。現行SDKでは、自動追加されるBLOB_STORE_IDとVercelのOIDC認証を利用できます。読み書きトークンを使う場合はBLOB_READ_WRITE_TOKENを設定します。手動でOIDCトークンをコピー・固定しません。[SDKの認証仕様](https://vercel.com/docs/vercel-blob/using-blob-sdk)
@@ -265,10 +269,18 @@ docs/screenshots/             実画面のスクリーンショット
 - ユーザーデータの自動保持期限、アカウント削除、セッションの個別失効
 - アクセシビリティと各ブラウザでの検証の拡充
 
-## GitHub公開前の確認
+## 秘密情報の扱い
 
-- 初回コミットの前に、作者名を公開してよい名前にし、作者メールにはGitHubのSettings → Emailsに表示されるnoreplyアドレスを設定してください。プロジェクト内で`git config user.email "自分のnoreplyアドレス"`を実行すると、そのリポジトリだけに適用されます。Web画面でメールを非公開にするだけでは、ローカルGitの作者メールは変わりません。[GitHub公式の設定方法](https://docs.github.com/en/account-and-profile/how-tos/email-preferences/setting-your-commit-email-address)
-- .env.local、.env.production、.vercel、.awsなどは.gitignoreで除外しています。`git add -f`で除外を解除せず、コミット対象を確認してください。.env.exampleには実際の値を入れません。
-- テスト内のパスワード・トークン文字列は架空の検証用です。本番の管理者パスワードとして使用しないでください。
-- READMEの画像はサンプルデータです。実際の診断結果・入力URL・ダウンロード済みJSONには組織名や公開したくないパスが含まれる可能性があるため、無確認で追加しないでください。
-- リポジトリ名、使用するライセンス、実サイト診断を有効にするかどうかをご確認ください。GitHubへのpushとVercelでの公開は、所有者の確認後に実施します。
+- .env.local、.env.production、.vercel、.awsなどは.gitignoreで除外しています。.env.exampleには実際の値を入れていません。
+- 秘密値（OAuthのClient Secret、SESSION_SECRET、管理者パスワードなど）はVercelの環境変数だけに設定し、リポジトリには含めません。
+- テスト内のパスワード・トークン文字列は架空の検証用です。本番の値として使用しないでください。
+- READMEの画像は自動テストのサンプルデータで、実際の診断結果や組織名は含みません。
+
+## 運用手順書
+
+- [GitHubからVercelへ追加機能を反映する手順](log/GitHubからVercelへ追加機能を反映する手順.md)
+- [DNSのTXTレコードでドメインを確認する手順（CORESERVER・バリュードメインの例）](log/coreserver-dns-txt-verification-guide.md)
+
+## ライセンス
+
+[MIT License](LICENSE)
